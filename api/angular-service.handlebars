@@ -1,0 +1,23 @@
+@Injectable({
+    providedIn: 'root'
+})
+export class APIService {
+
+    constructor(private http: HttpClient) {}
+
+    {{#each api}}
+    {{name}}({{{args}}}) {
+    {{> get}}
+    }
+
+    {{/each}}
+}
+
+{{#*inline "get"}}
+    const params = new HttpParams().appendAll(params);
+    return this.http.get('{{url}}', params);
+{{/inline}}
+
+{{#*inline "post"}}
+    return this.http.post();
+{{/inline}}
