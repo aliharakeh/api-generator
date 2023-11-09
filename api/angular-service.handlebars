@@ -6,18 +6,22 @@ export class APIService {
     constructor(private http: HttpClient) {}
 
     {{#each api}}
-    {{name}}({{{args}}}) {
-    {{> get}}
-    }
+    {{> (lookup . "method") }}
 
     {{/each}}
 }
 
 {{#*inline "get"}}
-    const params = new HttpParams().appendAll(params);
-    return this.http.get('{{url}}', params);
+{{name}}(params?: {{name}}['params'], config?: HttpConfig) {
+    params = new HttpParams().appendAll(params || {});
+    return this.http.get('{{url}}', { params, ...config });
+}
 {{/inline}}
 
+
 {{#*inline "post"}}
-    return this.http.post();
+{{name}}(data: {{name}}['data'], params?: {{name}}['params'], config?: HttpConfig) {
+    params = new HttpParams().appendAll(params || {});
+    return this.http.post('{{url}}', data, { params, ...config });
+}
 {{/inline}}
