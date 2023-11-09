@@ -1,10 +1,11 @@
-import {GET, POST} from './utils';
+import { GET, POST, ResponseWrapper } from './utils';
 
 export interface API_A extends GET {
     url: 'api/a';
     params: {
         id: number;
     };
+    response: ResponseWrapper<any>;
 }
 
 export interface API_B extends POST {
@@ -15,4 +16,5 @@ export interface API_B extends POST {
     data: {
         b: number;
     };
+    response: ResponseWrapper<any>;
 }

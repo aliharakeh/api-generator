@@ -6,27 +6,7 @@ import Handlebars from "handlebars";
 const importTemplate = Handlebars.compile(`import \{ {{imports}} \} from './{{importPath}}';\n\n`);
 const serviceTemplate = Handlebars.compile(readFileSync('api/angular-service.handlebars', { encoding: 'utf-8'}));
 
-/**
- * A regex that will parse a typescript interface ans extract the interface name, extended interface name, and the url property defined
- * explanation:
- * | interface, extends | exact words match |
- * ------------|------------------
- * | [\s\t\n\r]+, [\s\t\n\r]* | any kind of spacing |
- * ------------|------------------
- * | { | open curly braces |
- * ------------|------------------
- * */
-const interfacePattern = /interface[\s\t\n\r]+(\w+)[\s\t\n\r]+extends[\s\t\n\r]+(\w+)[\s\t\n\r]*\{[\s\t\n\r]*url[\s\t\n\r]*:[\s\t\n\r]*'(.+?)'[\s\t\n\r]*/g;
 
-/** The interface of the extracted regex data */
-interface RegexData {
-    /** Interface name */
-    name: string;
-    /** HTTP method */
-    method: string;
-    /** API Url */
-    url: string;
-}
 
 /**
  * @param rootPath The root directory path where the API files are located
