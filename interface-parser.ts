@@ -1,59 +1,41 @@
-import { join } from 'node:path';
-import { Project, PropertySignature, SyntaxKind } from 'ts-morph';
+import { Project, ts, Type } from 'ts-morph';
 
 /** The interface of the extracted regex data */
-interface InterfaceParsedData {
+export interface InterfaceParsedData {
     /** Interface name */
     name: string;
     /** HTTP method */
     method: string;
     /** API Url */
     url: string;
+    /** API Response Type */
+    responseType: string;
 }
 
-export function geInterfaceParsedData(): InterfaceParsedData[] {
+const responseTypeRexe = /^import\(.+?\)\.(.*)$/;
+
+interface Fields {
+    [name: string]:  Type;
+}
+
+export function geInterfaceParsedData(path: string): InterfaceParsedData[] {
     const project = new Project();
-    const sourceFile = project.addSourceFileAtPath(join(__dirname, 'api', 'setA.ts'));
+    const sourceFile = project.addSourceFileAtPath(path);
+
 
     const interfaces = sourceFile.getInterfaces();
     return interfaces.map(interfaceDeclaration => {
         const name = interfaceDeclaration.getName();
         const method = interfaceDeclaration.getHeritageClauses()[0].getText().replace('extends', '').trim().toLowerCase();
-        const fields = interfaceDeclaration.getProperties().reduce((acc, prop) => {
-            acc[prop.getName()] = prop.getType().getLiteralValue();
+        const fields: Fields = interfaceDeclaration.getProperties().reduce((acc, prop) => {
+            acc[prop.getName()] = prop.getType();
             return acc;
         }, {});
-        extractNestedProperties(interfaceDeclaration.getProperties());
-        const res = { name, method, url: fields['url'] };
-        return res;
+        return {
+            name,
+            method,
+            url: fields['url'].getLiteralValue() as string,
+            responseType: fields['response'].getText().replace(responseTypeRexe, '$1')
+        };
     });
 }
-
-function extractNestedProperties(properties: PropertySignature[], prefix = ''): any[] {
-    let nestedProperties: any[] = [];
-
-    properties.forEach(property => {
-        const propertyName = property.getName();
-        const propertyType = property.getType();
-
-        if (propertyType.isObject()) {
-            const nestedProperties = propertyType.getProperties();
-            nestedProperties.forEach(nestedProperty => {
-                const nestedPropertyName = nestedProperty.getName();
-                const nestedPropertyType = nestedProperty.getDeclaredType();
-
-                console.log(`Nested Property: ${propertyName}.${nestedPropertyName}, Type: ${nestedPropertyType.getText()}`);
-            });
-        }
-
-        nestedProperties.push({
-            property: prefix + propertyName,
-            type: propertyType,
-        });
-    });
-
-    return nestedProperties;
-}
-
-// console.log(geInterfaceParsedData());
-geInterfaceParsedData()

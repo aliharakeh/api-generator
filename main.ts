@@ -2,6 +2,7 @@ import { readdir, readFile, writeFile } from 'fs/promises';
 import { readFileSync } from 'fs';
 import { join } from 'node:path';
 import Handlebars from "handlebars";
+import { geInterfaceParsedData,InterfaceParsedData } from './interface-parser';
 
 const importTemplate = Handlebars.compile(`import \{ {{imports}} \} from './{{importPath}}';\n\n`);
 const serviceTemplate = Handlebars.compile(readFileSync('api/angular-service.handlebars', { encoding: 'utf-8'}));
@@ -16,37 +17,23 @@ async function generateApi(rootPath: string): Promise<void> {
     for (const file of files) {
         if (file.endsWith('.ts') && !['utils.ts', '-api.ts'].some(s => file.endsWith(s))) {
             const apiFile = join(rootPath, file);
-            const regexData = await getAllInterfaces(apiFile);
+            const regexData = geInterfaceParsedData(apiFile);
             await generateApiFile(apiFile, file, regexData);
         }
     }
 }
 
 /**
- * @param filePath The path to the API file.
- * */
-async function getAllInterfaces(filePath: string): Promise<RegexData[]> {
-    const content = await readFile(filePath, { encoding: 'utf-8' });
-    return [...content.matchAll(interfacePattern)].map(data => {
-        return {
-            name: data[1],
-            method: data[2],
-            url: data[3]
-        };
-    });
-}
-
-/**
  * @param apiFile The path to the API file.
  * @param importFile The name of the import file.
- * @param regexData An array of objects containing regex data, with each object having the properties name, method, and url.
+ * @param interfaceParsedData An array of objects containing interface data
  * */
-async function generateApiFile(apiFile: string, importFile: string, regexData: RegexData[]): Promise<void> {
-    const imports = regexData.map(data => data.name).join(', ');
+async function generateApiFile(apiFile: string, importFile: string, interfaceParsedData: InterfaceParsedData[]): Promise<void> {
+    const imports = interfaceParsedData.map(data => data.name).join(', ');
     const importPath = importFile.replace('.ts', '');
     let res = [];
     const outputName = generateApiFileName(apiFile);
-    for (let data of regexData) {
+    for (let data of interfaceParsedData) {
         res.push(generateApiFunction(data));
     }
     const data = importTemplate({ imports, importPath }) +  serviceTemplate({ api: res });
@@ -63,12 +50,13 @@ function generateApiFileName(apiFile: string): string {
 /**
  * @param regexData The extracted regex data
  * */
-function generateApiFunction({ name, method, url }: RegexData) {
+function generateApiFunction({ name, method, url, responseType }: InterfaceParsedData) {
     const params = `params?: ${name}['params']`;
     const data = method === 'GET' ? '' : `, data?: ${name}['data']`;
     return {
         url,
         name,
+        responseType,
         method: method.toLowerCase(),
         args: params + data
     };

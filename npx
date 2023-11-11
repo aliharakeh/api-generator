@@ -1,0 +1,11 @@
+[
+  '"api/a"',
+  '{ id: number; }',
+  'import("D:/Desktop/GitHub/api-generator/api/utils").ResponseWrapper<any>'
+]
+[
+  '"api/b"',
+  '{ id: number; }',
+  '{ b: number; }',
+  'import("D:/Desktop/GitHub/api-generator/api/utils").ResponseWrapper<any>'
+]

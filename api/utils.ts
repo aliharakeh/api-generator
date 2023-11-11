@@ -1,11 +1,11 @@
 export interface GET {
-    utl: string;
+    url: string;
     params?: any;
     response: ResponseWrapper<any>;
 }
 
 export interface POST {
-    utl: string;
+    url: string;
     params?: any;
     data?: any;
     response: ResponseWrapper<any>;

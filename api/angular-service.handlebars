@@ -1,4 +1,3 @@
-import { GET, POST } from './utils';
 
 @Injectable({
     providedIn: 'root'
@@ -14,7 +13,7 @@ export class APIService {
 }
 
 {{#*inline "get"}}
-{{name}}(params?: {{name}}['params'], config?: HttpConfig): Observable<ResponseWrapper<>> {
+{{name}}(params?: {{name}}['params'], config?: HttpConfig): Observable<{{{responseType}}}> {
     params = new HttpParams().appendAll(params || {});
     return this.http.get('{{url}}', { params, ...config });
 }
@@ -22,7 +21,7 @@ export class APIService {
 
 
 {{#*inline "post"}}
-{{name}}(data: {{name}}['data'], params?: {{name}}['params'], config?: HttpConfig) {
+{{name}}(data: {{name}}['data'], params?: {{name}}['params'], config?: HttpConfig): Observable<{{{responseType}}}> {
     params = new HttpParams().appendAll(params || {});
     return this.http.post('{{url}}', data, { params, ...config });
 }
