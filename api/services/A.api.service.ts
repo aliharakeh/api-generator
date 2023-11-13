@@ -1,5 +1,5 @@
-import { API_A, API_B } from './setA';
-
+import { Injectable } from '@angular/core';
+import { API_A, API_B } from '../models/A.model';
 
 @Injectable({
     providedIn: 'root'

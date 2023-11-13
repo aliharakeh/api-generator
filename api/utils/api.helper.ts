@@ -1,7 +1,7 @@
-import { Project, ts, Type } from 'ts-morph';
+import { Project, Type } from 'ts-morph';
 
 /** The interface of the extracted regex data */
-export interface InterfaceParsedData {
+export interface ParsedApiModel {
     /** Interface name */
     name: string;
     /** HTTP method */
@@ -12,17 +12,15 @@ export interface InterfaceParsedData {
     responseType: string;
 }
 
-const responseTypeRexe = /^import\(.+?\)\.(.*)$/;
+const responseTypeRegex = /^import\(.+?\)\.(.*)$/;
 
 interface Fields {
-    [name: string]:  Type;
+    [name: string]: Type;
 }
 
-export function geInterfaceParsedData(path: string): InterfaceParsedData[] {
+export function getApiInterfaces(path: string): ParsedApiModel[] {
     const project = new Project();
     const sourceFile = project.addSourceFileAtPath(path);
-
-
     const interfaces = sourceFile.getInterfaces();
     return interfaces.map(interfaceDeclaration => {
         const name = interfaceDeclaration.getName();
@@ -35,7 +33,22 @@ export function geInterfaceParsedData(path: string): InterfaceParsedData[] {
             name,
             method,
             url: fields['url'].getLiteralValue() as string,
-            responseType: fields['response'].getText().replace(responseTypeRexe, '$1')
+            responseType: fields['response'].getText().replace(responseTypeRegex, '$1')
         };
     });
+}
+
+/**
+ * @param regexData The extracted regex data
+ * */
+export function getApiRequestArgs({ name, method, url, responseType }: ParsedApiModel) {
+    const params = `params?: ${name}['params']`;
+    const data = method === 'GET' ? '' : `, data?: ${name}['data']`;
+    return {
+        url,
+        name,
+        responseType,
+        method: method.toLowerCase(),
+        args: params + data
+    };
 }

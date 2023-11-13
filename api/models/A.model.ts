@@ -1,4 +1,4 @@
-import { GET, POST, ResponseWrapper } from './utils';
+import { GET, POST, ResponseWrapper } from './_base.model';
 
 export interface API_A extends GET {
     url: 'api/a';

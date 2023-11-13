@@ -1,3 +1,5 @@
+import { Injectable } from '@angular/core';
+import { {{importedItems}} } from '../models/{{importsPath}}';
 
 @Injectable({
     providedIn: 'root'
@@ -6,7 +8,7 @@ export class APIService {
 
     constructor(private http: HttpClient) {}
 
-    {{#each api}}
+    {{#each apis}}
     {{> (lookup . "method") }}
 
     {{/each}}
