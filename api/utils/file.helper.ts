@@ -1,5 +1,4 @@
 import { lstat, mkdir, readdir } from 'fs/promises';
-import { join } from 'node:path';
 
 export async function createOrCheckDir(path: string) {
     try {

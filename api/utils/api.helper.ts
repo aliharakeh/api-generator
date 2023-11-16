@@ -1,4 +1,5 @@
 import { Project, Type } from 'ts-morph';
+import * as url from 'url';
 
 /** The interface of the extracted regex data */
 export interface ParsedApiModel {
@@ -22,18 +23,29 @@ export function getApiInterfaces(path: string): ParsedApiModel[] {
     const project = new Project();
     const sourceFile = project.addSourceFileAtPath(path);
     const interfaces = sourceFile.getInterfaces();
+
+    console.log(path);
+    console.log('-------------------------');
+
     return interfaces.map(interfaceDeclaration => {
         const name = interfaceDeclaration.getName();
-        const method = interfaceDeclaration.getHeritageClauses()[0].getText().replace('extends', '').trim().toLowerCase();
+        const method = interfaceDeclaration.getHeritageClauses()[0].getText().replace('extends', '').trim();
         const fields: Fields = interfaceDeclaration.getProperties().reduce((acc, prop) => {
             acc[prop.getName()] = prop.getType();
             return acc;
         }, {});
+
+        let baseUrl = '';
+        const responseType = fields['response'].getText().replace(responseTypeRegex, '$1');
+        const url = fields['url'].getLiteralValue() as string;
+
+        console.log(`[${method}] ${name}: ${responseType} --> ${baseUrl}${url}`);
+
         return {
             name,
-            method,
-            url: fields['url'].getLiteralValue() as string,
-            responseType: fields['response'].getText().replace(responseTypeRegex, '$1')
+            method: method.toLowerCase(),
+            url,
+            responseType
         };
     });
 }

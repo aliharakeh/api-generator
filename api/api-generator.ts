@@ -2,8 +2,8 @@ import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import Handlebars from 'handlebars';
 import { join } from 'node:path';
-import { createOrCheckDir, getAngularServicePath, getApiFiles } from './utils/file.helper';
 import { getApiInterfaces, getApiRequestArgs, ParsedApiModel } from './utils/api.helper';
+import { createOrCheckDir, getAngularServicePath, getApiFiles } from './utils/file.helper';
 
 const serviceTemplate = Handlebars.compile(
     readFileSync(join(__dirname, 'templates', 'angular-service.handlebars'), { encoding: 'utf-8' })
@@ -24,6 +24,9 @@ export async function generateApi(rootPath: string, outputPath: string): Promise
     for (const apiFile of apiFiles) {
         const apiModels = getApiInterfaces(join(modelsPath, apiFile));
         await generateApiService(outputPath, apiFile, apiModels);
+        if (apiFiles.length > 1) {
+            console.log('\n\n');
+        }
     }
 }
 
