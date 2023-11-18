@@ -1,6 +1,6 @@
-import { GET, POST, ResponseWrapper } from './_base.model';
+import { GET, POST, ResponseWrapper, APIs } from './_base.model';
 
-export interface API_A extends GET {
+export interface API_A extends GET<APIs.BASE> {
     url: 'api/a';
     params: {
         id: number;
@@ -8,7 +8,7 @@ export interface API_A extends GET {
     response: ResponseWrapper<any>;
 }
 
-export interface API_B extends POST {
+export interface API_B extends POST<APIs.BASE> {
     url: 'api/b';
     params: {
         id: number;

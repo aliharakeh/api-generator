@@ -2,7 +2,7 @@ import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import Handlebars from 'handlebars';
 import { join } from 'node:path';
-import { getApiInterfaces, getApiRequestArgs, ParsedApiModel } from './utils/api.helper';
+import { getApiInterfaces, getApiRequestArgs, ParsedApiModel } from './utils/api.extracter';
 import { createOrCheckDir, getAngularServicePath, getApiFiles } from './utils/file.helper';
 
 const serviceTemplate = Handlebars.compile(
@@ -33,14 +33,13 @@ export async function generateApi(rootPath: string, outputPath: string): Promise
 /**
  * @param outputPath The path to save the API service to.
  * @param importFile The name of the import file.
- * @param interfaceParsedData An array of objects containing interface data
+ * @param apis An array of objects containing interface data
  * */
-async function generateApiService(outputPath: string, importFile: string, interfaceParsedData: ParsedApiModel[]): Promise<void> {
-    const importedItems = interfaceParsedData.map(data => data.name).join(', ');
+async function generateApiService(outputPath: string, importFile: string, apis: ParsedApiModel[]): Promise<void> {
+    const importedItems = apis.map(data => data.name).join(', ');
     const importsPath = importFile.replace('.ts', '');
 
     const serviceFileName = getAngularServicePath(importFile);
-    const apis = interfaceParsedData.map(apiData => getApiRequestArgs(apiData));
 
     const data = serviceTemplate({ apis, importedItems, importsPath });
     await writeFile(join(outputPath, serviceFileName), data, { encoding: 'utf-8' });
