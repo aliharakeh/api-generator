@@ -18,13 +18,13 @@ export interface HttpOptions {
 }
 
 export interface GET<T> {
-    url: string;
+    endpoint: string;
     params?: any;
     response: ApiResponse<any>;
 }
 
 export interface POST<T> {
-    url: string;
+    endpoint: string;
     params?: any;
     data?: any;
     response: ApiResponse<any>;

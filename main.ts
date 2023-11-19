@@ -1,3 +1,3 @@
-import { generateApi } from './api/api-generator';
+import { generateApi } from './api-generator/api-generator';
 
 generateApi('api', 'services');
