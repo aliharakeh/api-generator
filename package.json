@@ -1,11 +1,14 @@
 {
   "name": "api-generator",
+  "type": "module",
   "version": "1.0.0",
   "description": "A typescript api generator to automate the api request function creation",
   "scripts": {
     "start": "ts-node main.ts"
   },
   "devDependencies": {
+    "@angular/common": "^17.0.3",
+    "@angular/compiler": "^17.0.3",
     "handlebars": "^4.7.8",
     "ts-morph": "^20.0.0",
     "ts-node": "^10.9.1",
@@ -13,10 +16,12 @@
   },
   "keywords": [
     "api",
-    "rest-api",
-    "generate",
+    "rest",
+    "api",
+    "generator",
     "automate",
-    "typescript"
+    "typescript",
+    "angular"
   ],
   "license": "MIT"
 }

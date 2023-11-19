@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpParams } from '@angular/common/http';
-import { API_A, API_B } from '../endpoints/uers';
+import { API_A, API_B } from '../endpoints/auth';
 import { HttpOptions, APIs, ResponseWrapper } from '../models/_api';
 
 @Injectable({

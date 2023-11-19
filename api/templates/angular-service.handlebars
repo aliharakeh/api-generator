@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
+import { HttpParams } from '@angular/common/http';
+import { HttpOptions, APIs, ResponseWrapper } from '../models/_api';
 import { {{importedItems}} } from '../models/{{importsPath}}';
-import { APIs, ResponseWrapper } from '../models/_base.model';
 
 @Injectable({
     providedIn: 'root'
@@ -16,16 +17,16 @@ export class APIService {
 }
 
 {{#*inline "get"}}
-{{name}}(params?: {{name}}['params'], config?: HttpConfig): Observable<{{{responseType}}}> {
-    params = new HttpParams().appendAll(params || {});
-    return this.http.get({{baseUrl}} + '{{url}}', { params, ...config });
+{{name}}(params?: {{name}}['params'], options?: HttpOptions): Observable<{{{responseType}}}> {
+    params = new HttpParams({ fromObject: params || {} });
+    return this.http.get({{baseUrl}} + '/{{endpoint}}', { params, ...config });
 }
 {{/inline}}
 
 
 {{#*inline "post"}}
-{{name}}(data: {{name}}['data'], params?: {{name}}['params'], config?: HttpConfig): Observable<{{{responseType}}}> {
-    params = new HttpParams().appendAll(params || {});
-    return this.http.post({{baseUrl}} + '{{url}}', data, { params, ...config });
+{{name}}(data: {{name}}['data'], params?: {{name}}['params'], options?: HttpOptions): Observable<{{{responseType}}}> {
+    params = new HttpParams({ fromObject: params || {} });
+    return this.http.post({{baseUrl}} + '/{{endpoint}}', data, { params, ...config });
 }
 {{/inline}}

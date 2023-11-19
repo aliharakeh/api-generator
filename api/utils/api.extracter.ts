@@ -9,7 +9,7 @@ export interface ParsedApiModel {
     /** API Base Url */
     baseUrl: string;
     /** API Url */
-    url: string;
+    endpoint: string;
     /** API Response Type */
     responseType: string;
 }
@@ -37,16 +37,18 @@ export function getApiInterfaces(path: string): ParsedApiModel[] {
             return acc;
         }, {});
 
-        const responseType = fields['response'].getText().replace(responseTypeRegex, '$1');
-        const url = fields['url'].getLiteralValue() as string;
+        console.log(fields);
 
-        console.log(`[${method}] ${name}: ${responseType} --> ${baseUrl}${url}`);
+        const responseType = fields['response'].getText().replace(responseTypeRegex, '$1');
+        const endpoint = fields['endpoint'].getLiteralValue() as string;
+
+        console.log(`[${method}] ${name}: ${responseType} --> ${baseUrl} (${endpoint})`);
 
         return getApiRequestArgs({
             name,
             method,
             baseUrl,
-            url,
+            endpoint,
             responseType
         });
     });
@@ -55,12 +57,12 @@ export function getApiInterfaces(path: string): ParsedApiModel[] {
 /**
  * @param regexData The extracted regex data
  * */
-export function getApiRequestArgs({ name, method, baseUrl, url, responseType }: ParsedApiModel) {
+export function getApiRequestArgs({ name, method, baseUrl, endpoint, responseType }: ParsedApiModel) {
     const params = `params?: ${name}['params']`;
     const data = method === 'GET' ? '' : `, data?: ${name}['data']`;
     return {
         baseUrl,
-        url,
+        endpoint,
         name,
         responseType,
         method: method.toLowerCase(),

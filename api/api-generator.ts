@@ -2,11 +2,11 @@ import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
 import Handlebars from 'handlebars';
 import { join } from 'node:path';
-import { getApiInterfaces, getApiRequestArgs, ParsedApiModel } from './utils/api.extracter';
+import { getApiInterfaces, ParsedApiModel } from './utils/api.extracter';
 import { createOrCheckDir, getAngularServicePath, getApiFiles } from './utils/file.helper';
 
 const serviceTemplate = Handlebars.compile(
-    readFileSync(join(__dirname, 'templates', 'angular-service.handlebars'), { encoding: 'utf-8' })
+    readFileSync(join('api', 'templates', 'angular-service.handlebars'), { encoding: 'utf-8' })
 );
 
 /**
@@ -14,15 +14,15 @@ const serviceTemplate = Handlebars.compile(
  * @param outputPath The folder name to generate the services in
  * */
 export async function generateApi(rootPath: string, outputPath: string): Promise<void> {
-    const modelsPath = join(rootPath, 'models');
-    await createOrCheckDir(modelsPath);
+    const endpointsPath = join(rootPath, 'endpoints');
+    await createOrCheckDir(endpointsPath);
 
     outputPath = join(rootPath, outputPath);
     await createOrCheckDir(outputPath);
 
-    const apiFiles = await getApiFiles(modelsPath);
+    const apiFiles = await getApiFiles(endpointsPath);
     for (const apiFile of apiFiles) {
-        const apiModels = getApiInterfaces(join(modelsPath, apiFile));
+        const apiModels = getApiInterfaces(join(endpointsPath, apiFile));
         await generateApiService(outputPath, apiFile, apiModels);
         if (apiFiles.length > 1) {
             console.log('\n\n');
