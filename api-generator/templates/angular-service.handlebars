@@ -1,7 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpParams, HttpClient } from '@angular/common/http';
 import { HttpOptions, APIs, ApiResponse } from '../models/_api';
-import { {{importedItems}} } from '../models/{{importsPath}}';
+import { {{importedItems}} } from '../endpoints/{{importsPath}}';
+{{#each importsMap}}
+import { {{0}} } from '{{1}}';
+{{/each}}
 
 @Injectable({
     providedIn: 'root'

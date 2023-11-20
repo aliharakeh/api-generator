@@ -1,7 +1,7 @@
 import { HeritageClause, InterfaceDeclaration, Project, Type } from 'ts-morph';
 
 
-const IMPORT_REGEX = /^import\((.+?)\)\.(.*)$/;
+const IMPORT_REGEX = /import\(["'](.*?)["']\)\.(\w+(?:<\w+>)?)/g;
 const METHOD_PATTERN = /^extends\s+(\w+)<(.*)>$/;
 const REQUIRED_FIELDS = ['endpoint'];
 
@@ -25,10 +25,11 @@ export interface ParsedApiModel {
 }
 
 export class InterfaceParser {
-    project: Project;
-    importsMap = new Map<string, string[]>();
+    public importsMap = new Map<string, Map<string, Set<string>>>();
+    private project: Project;
+    private currentSourceFile = null;
 
-    constructor() {
+    constructor(private rootPath: string) {
         this.project = new Project();
     }
 
@@ -41,6 +42,7 @@ export class InterfaceParser {
         const interfaces = {};
         for (const file of sourceFiles) {
             const fileName = file.getBaseName();
+            this.currentSourceFile = fileName;
             console.log(fileName);
             console.log('-------------------------');
             interfaces[fileName] = file.getInterfaces().map(int => this.parseInterface(int));
@@ -107,11 +109,39 @@ export class InterfaceParser {
 
     parseTypeText(typeText: string) {
         if (typeText.startsWith('import')) {
-            const [path, value] = typeText.match(IMPORT_REGEX).slice(1, 3);
-            const importItems = this.importsMap.get(path) || [];
-            this.importsMap.set(path, importItems.concat(value));
-            return value;
+            return this.parseImportPaths(typeText).reverse().reduce((acc, model, i) => {
+                return i == 0 ? model : `${model}<${acc}>`;
+            }, '');
         }
         return typeText;
+    }
+
+    parseImportPaths(typeText: string) {
+        let models = [];
+        let matches = typeText.matchAll(IMPORT_REGEX);
+        for (let match of matches) {
+            const [importPath, model] = match.slice(1, 3);
+            // TODO: each sourceFile must have an object containing import path with model name
+            if (!this.importsMap.has(this.currentSourceFile)) {
+                const map = new Map();
+                map.
+                this.importsMap.set(this.currentSourceFile, );
+            }
+            const importItems = this.importsMap.get(this.currentSourceFile) || new Map();
+            const path = this.cleanImportPath(importPath);
+            const imports = importItems.get(path) || new Set();
+            imports.add(model)
+            models.push(model);
+        }
+        return models;
+    }
+
+    getImports(sourceFile: string) {
+        return [...this.importsMap.get(sourceFile).keys()];
+    }
+
+    cleanImportPath(path: string) {
+        // TODO: clean the path and only keep the file name to reference it from the models folder in the template
+        return path;
     }
 }

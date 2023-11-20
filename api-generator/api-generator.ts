@@ -22,20 +22,15 @@ export async function generateApi(rootPath: string, outputPath: string): Promise
     await createOrCheckDir(outputPath);
 
     const apiFiles = await getApiModels(endpointsPath);
-    const interfaceParser = new InterfaceParser();
+    const interfaceParser = new InterfaceParser(rootPath);
     apiFiles.forEach(file => interfaceParser.addFile(join(endpointsPath, file)));
     const interfaces = interfaceParser.getInterfaces();
     for (const sourceFile of Object.keys(interfaces)) {
-        await generateApiService(outputPath, sourceFile, interfaces[sourceFile]);
+        await generateApiService(outputPath, sourceFile, interfaces[sourceFile], interfaceParser.getImports(sourceFile));
     }
 }
 
-/**
- * @param outputPath The path to save the API service to.
- * @param apiFile The name of the import file.
- * @param apis An array of objects containing interface data
- * */
-async function generateApiService(outputPath: string, apiFile: string, apis: ParsedApiModel[]): Promise<void> {
+async function generateApiService(outputPath: string, apiFile: string, apis: ParsedApiModel[], imports: string[]): Promise<void> {
     const importedItems = apis.map(data => data.name).join(', ');
     const importsPath = apiFile.replace('.ts', '');
 
@@ -45,7 +40,8 @@ async function generateApiService(outputPath: string, apiFile: string, apis: Par
         serviceName: templateData.serviceName,
         apis: templateData.data,
         importedItems,
-        importsPath
+        importsPath,
+        importsMap: imports.join(', ')
     });
     await writeFile(join(outputPath, templateData.serviceFileName), data, { encoding: 'utf-8' });
 }
