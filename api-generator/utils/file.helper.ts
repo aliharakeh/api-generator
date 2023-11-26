@@ -1,4 +1,4 @@
-import { lstat, mkdir, readdir } from 'fs/promises';
+import { lstat, mkdir } from 'fs/promises';
 
 export async function createOrCheckDir(path: string) {
     try {
@@ -7,9 +7,4 @@ export async function createOrCheckDir(path: string) {
     catch (e) {
         await mkdir(path);
     }
-}
-
-export async function getApiModels(modelsPath: string) {
-    const files = await readdir(modelsPath);
-    return files.filter(f => !f.startsWith('_'));
 }

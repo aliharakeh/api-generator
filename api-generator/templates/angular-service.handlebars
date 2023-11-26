@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpParams, HttpClient } from '@angular/common/http';
-import { HttpOptions, APIs, ApiResponse } from '../models/_api';
+import { Observable } from 'rxjs';
+import { HttpOptions, APIs } from '../models/_api';
 import { {{importedItems}} } from '../endpoints/{{importsPath}}';
-{{#each importsMap}}
+{{#each imports}}
 import { {{0}} } from '{{1}}';
 {{/each}}
 

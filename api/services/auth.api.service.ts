@@ -2,9 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpParams, HttpClient } from '@angular/common/http';
 import { HttpOptions, APIs } from '../models/_api';
 import { login, logout } from '../endpoints/auth';
-import { ApiResponse } from '/api/models/_api';
-import { User } from '/api/models/user';
-import { UserRoles } from '/api/models/user-roles';
+import { ApiResponse } from 'models/_api';
+import { User } from 'models/user';
 
 @Injectable({
     providedIn: 'root'

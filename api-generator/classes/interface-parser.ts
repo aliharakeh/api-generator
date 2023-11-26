@@ -1,13 +1,9 @@
-import { HeritageClause, InterfaceDeclaration, Project, Type } from 'ts-morph';
+import { HeritageClause, InterfaceDeclaration, Project, SourceFile, Type } from 'ts-morph';
+import { ImportPathParser } from './import-path-parser';
 
 
-const IMPORT_REGEX = /import\(["'](.*?)["']\)\.(\w+(?:<\w+>)?)/g;
 const METHOD_PATTERN = /^extends\s+(\w+)<(.*)>$/;
 const REQUIRED_FIELDS = ['endpoint'];
-
-export interface ParsedInterfaces {
-    [key: string]: ParsedApiModel[];
-}
 
 export interface Fields {
     endpoint: Type;
@@ -25,33 +21,16 @@ export interface ParsedApiModel {
 }
 
 export class InterfaceParser {
-    public importsMap = new Map<string, Map<string, Set<string>>>();
-    private project: Project;
-    private currentSourceFile = null;
+    public importsMap = new Map<string, Set<string>>();
+    public interfaces: ParsedApiModel[];
 
-    constructor(private rootPath: string) {
-        this.project = new Project();
-    }
-
-    addFile(path: string) {
-        this.project.addSourceFileAtPath(path);
-    }
-
-    getInterfaces(): ParsedInterfaces {
-        const sourceFiles = this.project.getSourceFiles();
-        const interfaces = {};
-        for (const file of sourceFiles) {
-            const fileName = file.getBaseName();
-            this.currentSourceFile = fileName;
-            console.log(fileName);
-            console.log('-------------------------');
-            interfaces[fileName] = file.getInterfaces().map(int => this.parseInterface(int));
-            console.log();
-        }
-        return interfaces;
+    constructor(private rootPath: string, private sourceFile: SourceFile) {
+        // parse interfaces
+        this.interfaces = sourceFile.getInterfaces().map(i => this.parseInterface(i));
     }
 
     parseInterface(interfaceDeclaration: InterfaceDeclaration): ParsedApiModel {
+        // extract interface data
         const name = interfaceDeclaration.getName();
         const fields: Fields = this.parseFields(interfaceDeclaration);
         const [method, baseUrl] = this.parseMethodAndBaseUrl(interfaceDeclaration.getHeritageClauses(), fields);
@@ -70,10 +49,13 @@ export class InterfaceParser {
     }
 
     parseFields(interfaceDeclaration: InterfaceDeclaration) {
+        // get properties
         const fields = interfaceDeclaration.getProperties().reduce((acc, prop) => {
             acc[prop.getName()] = prop.getType();
             return acc;
         }, {} as Fields);
+
+        // check for required fields
         let errors = false;
         REQUIRED_FIELDS.forEach(fieldName => {
             if (!fields.hasOwnProperty(fieldName)) {
@@ -84,64 +66,51 @@ export class InterfaceParser {
         if (errors) {
             throw new Error('[ERROR] The above fields are required!');
         }
+
         return fields;
     }
 
     parseMethodAndBaseUrl(heritageClauses: HeritageClause[], fields: Fields) {
+        // check if interface extends any HTTP method
         if (!heritageClauses?.length) {
             throw new Error('[REQUIRED] Api Interface should extends the Method Type & Base Url! ex: extends GET<APIs.BASE>, extends POST<APIs.BASE>\n');
         }
+
+        // extract method and base url
         let [method, baseUrl] = heritageClauses[0].getText().match(METHOD_PATTERN).slice(1, 3);
         method = method.toLowerCase();
         if (method === 'post' && !fields.data) {
             throw new Error('[REQUIRED] The API is using POST method while missing the data field!');
         }
+
         return [method, baseUrl];
     }
 
     parseResponse(fields: Fields) {
+        // check response field
         if (!fields.response) {
             return 'ApiResponse<any>';
         }
+
+        // parse response
         const response = fields.response.getText();
-        return this.parseTypeText(response);
+        const importPathParser = new ImportPathParser(this.rootPath, response);
+
+        // add any new imports to imports map
+        this.updateImportsMap(importPathParser.importMap);
+
+        return importPathParser.model;
     }
 
-    parseTypeText(typeText: string) {
-        if (typeText.startsWith('import')) {
-            return this.parseImportPaths(typeText).reverse().reduce((acc, model, i) => {
-                return i == 0 ? model : `${model}<${acc}>`;
-            }, '');
-        }
-        return typeText;
-    }
-
-    parseImportPaths(typeText: string) {
-        let models = [];
-        let matches = typeText.matchAll(IMPORT_REGEX);
-        for (let match of matches) {
-            const [importPath, model] = match.slice(1, 3);
-            // TODO: each sourceFile must have an object containing import path with model name
-            if (!this.importsMap.has(this.currentSourceFile)) {
-                const map = new Map();
-                map.
-                this.importsMap.set(this.currentSourceFile, );
+    updateImportsMap(importMap: Map<string, Set<string>>) {
+        for (const [path, models] of importMap.entries()) {
+            let mapItem = this.importsMap.get(path);
+            if (mapItem) {
+                [...models.values()].forEach(v => mapItem.add(v));
             }
-            const importItems = this.importsMap.get(this.currentSourceFile) || new Map();
-            const path = this.cleanImportPath(importPath);
-            const imports = importItems.get(path) || new Set();
-            imports.add(model)
-            models.push(model);
+            else {
+                this.importsMap.set(path, models);
+            }
         }
-        return models;
-    }
-
-    getImports(sourceFile: string) {
-        return [...this.importsMap.get(sourceFile).keys()];
-    }
-
-    cleanImportPath(path: string) {
-        // TODO: clean the path and only keep the file name to reference it from the models folder in the template
-        return path;
     }
 }
