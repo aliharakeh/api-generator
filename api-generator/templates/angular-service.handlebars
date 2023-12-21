@@ -1,10 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpParams, HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { HttpOptions, APIs } from '../models/_api';
-import { {{importedItems}} } from '../endpoints/{{importsPath}}';
-{{#each imports}}
-import { {{0}} } from '{{1}}';
+import { HttpOptions, APIs, ApiResponse } from '../models/_api';
+import { {{importedApis}} } from '{{importsApisPath}}';
+{{#each modelsImports}}
+import { {{models}} } from '{{path}}';
 {{/each}}
 
 @Injectable({
@@ -23,7 +23,7 @@ export class {{serviceName}} {
 {{#*inline "get"}}
 {{name}}(params?: {{name}}['params'], options?: HttpOptions): Observable<{{{responseType}}}> {
     params = new HttpParams({ fromObject: params || {} });
-    return this.http.get({{baseUrl}} + '/{{endpoint}}', { params, ...options });
+    return this.http.get<{{{responseType}}}>({{baseUrl}} + '/{{endpoint}}', { params, ...options });
 }
 {{/inline}}
 
@@ -31,6 +31,6 @@ export class {{serviceName}} {
 {{#*inline "post"}}
 {{name}}(data: {{name}}['data'], params?: {{name}}['params'], options?: HttpOptions): Observable<{{{responseType}}}> {
     params = new HttpParams({ fromObject: params || {} });
-    return this.http.post({{baseUrl}} + '/{{endpoint}}', data, { params, ...options });
+    return this.http.post<{{{responseType}}}>({{baseUrl}} + '/{{endpoint}}', data, { params, ...options });
 }
 {{/inline}}

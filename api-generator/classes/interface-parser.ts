@@ -1,9 +1,9 @@
-import { HeritageClause, InterfaceDeclaration, Project, SourceFile, Type } from 'ts-morph';
+import { HeritageClause, InterfaceDeclaration, SourceFile, Type } from 'ts-morph';
 import { ImportPathParser } from './import-path-parser';
-
 
 const METHOD_PATTERN = /^extends\s+(\w+)<(.*)>$/;
 const REQUIRED_FIELDS = ['endpoint'];
+const EXCLUDED_MODELS = ['ApiResponse', 'HttpOptions', 'APIs'];
 
 export interface Fields {
     endpoint: Type;
@@ -37,7 +37,7 @@ export class InterfaceParser {
         const responseType = this.parseResponse(fields);
         const endpoint = fields.endpoint.getLiteralValue() as string;
 
-        console.log(`[${method}] ${name}: ${responseType} --> ${baseUrl} (${endpoint})`);
+        console.log(`[${method}] ${name}: ${responseType} --> ${baseUrl} (/${endpoint})`);
 
         return {
             name,
@@ -112,5 +112,26 @@ export class InterfaceParser {
                 this.importsMap.set(path, models);
             }
         }
+    }
+
+    getModelsImports() {
+        return [...this.importsMap.entries()]
+            // exclude already imported base api models
+            .map(([path, models]) => {
+                const filteredModels = [...models.values()].filter(
+                    m => !EXCLUDED_MODELS.some(excluded => m.includes(excluded))
+                );
+                return [path, filteredModels] as [string, string[]];
+            })
+            // filter empty models
+            .filter(([_, models]) => models.length > 0)
+            // format models imports
+            .map(([path, models]) => {
+                return {
+                    // filter inner model's type
+                    models: models.map(m => m.split('<')[0]).join(', '),
+                    path: `../${path}`
+                };
+            });
     }
 }

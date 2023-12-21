@@ -7,21 +7,24 @@ import { InterfaceParser } from './classes/interface-parser';
 import { TemplateDataGenerator } from './classes/template-data-generator';
 import { createOrCheckDir } from './utils/file.helper';
 
+const ENDPOINTS_PATH = 'endpoints';
+const MODELS_PATH = 'models';
+const OUTPUT_PATH = 'services';
+
 const serviceTemplate = Handlebars.compile(
     readFileSync(join('api-generator', 'templates', 'angular-service.handlebars'), { encoding: 'utf-8' })
 );
 
 /**
- * @param rootPath The root directory path where the API files are located
- * @param outputPath The folder name to generate the services in
- * */
-export async function generateApi(rootPath: string, outputPath: string): Promise<void> {
+ * Generates the APIs based on the given root path and output path.
+ */
+export async function generateApi(rootPath: string): Promise<void> {
     // apis folder
-    const endpointsPath = join(rootPath, 'endpoints');
+    const endpointsPath = join(rootPath, ENDPOINTS_PATH);
     await createOrCheckDir(endpointsPath);
 
     // output folder
-    outputPath = join(rootPath, outputPath);
+    const outputPath = join(rootPath, OUTPUT_PATH);
     await createOrCheckDir(outputPath);
 
     // ts parser
@@ -42,20 +45,20 @@ export async function generateApi(rootPath: string, outputPath: string): Promise
     }
 }
 
+/**
+ * Generates an API service file based on the given output path, file name, and interface parser.
+ */
 async function generateApiService(outputPath: string, fileName: string, interfaceParser: InterfaceParser): Promise<void> {
-    const importedItems = interfaceParser.interfaces.map(data => data.name).join(', ');
-    const importsPath = fileName.replace('.ts', '');
+    const importedApis = interfaceParser.interfaces.map(data => data.name).join(', ');
+    const importsApisPath = `../${ENDPOINTS_PATH}/${fileName.replace('.ts', '')}`;
 
     const templateData = TemplateDataGenerator.getAngularTemplateData(fileName, interfaceParser.interfaces);
 
     const data = serviceTemplate({
-        serviceName: templateData.serviceName,
-        apis: templateData.data,
-        importedItems,
-        importsPath,
-        imports: Array.from(interfaceParser.importsMap.entries(), ([path, models]) => {
-            return [Array.from(models.values()).join(', '), path];
-        })
+        ...templateData,
+        importedApis,
+        importsApisPath,
+        modelsImports: interfaceParser.getModelsImports()
     });
     await writeFile(join(outputPath, templateData.serviceFileName), data, { encoding: 'utf-8' });
 }

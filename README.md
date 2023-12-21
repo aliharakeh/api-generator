@@ -1,22 +1,21 @@
 # Api Generator
 
-This is small tool to generate different types of api request calls automatically through an api interface described
-through typscript interfaces.
+This tool automatically generates API request functions from TypeScript interface definitions. It allows you to define APIs in a clean way using TypeScript interfaces, and handles details like query parameter encoding and request creation for you.
 
-## It allows for the followings
+## Features
+- Define APIs cleanly through TypeScript interfaces, specifying the types of each parameter.
+- Automatically generate request functions from the API interfaces you provide.
+- Automatically handle query parameters, encoding them into the required query URL format.
+- More easily navigate your APIs to understand the inputs each one needs and the outputs it provides.
 
-- Define your apis in a clean way through ts interfaces and what types each paramerter has.
-- Automatically generates the request functions for you from the api interfaces you provided.
-- Automatically handles query params and convert them into the required query url
-- Easier way to navigate you apis and know what each one needs and what the result it provides.
 
 **Note: This tool only supports angular services for now.**
 
 ## How to Start
 
-### 1) Customize you models
+### 1) Customize your API Urls & Response
 
-open `_api.ts` in the `api/models` folder and update it with your basic response interface and you api service
+open `_api.ts` in the `api/models` folder and update it with your basic response interface and your api service
 endpoints.
 
 ```ts
@@ -33,20 +32,52 @@ export enum APIs {
     APP_V2 = '/app/v2',
 }
 ```
+### 2) Add you API Models
+add your api models in the `models` folder in the formal of `<model>.ts`
+```ts
+// user.ts
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  password: string;
+}
+```
+```ts
+// user-roles.ts
+export interface UserRoles {
+    roleId: number;
+    roles: string[];
+}
+```
 
-### 2) Add you apis
-
-add your apis in the models folder next to the _api.ts in the formal of <name>.model.ts
+### 3) Add your APIs Endpoints
+add your apis in the `endpoints` folder.
 
 ```ts
-import { GET, POST, ApiResponse, APIs } from './_base.model';
+// users.ts
+import { ApiResponse, APIs, GET, POST } from '../models/_api';
+import { UserRoles } from '../models/user-roles';
 
-/** Example Model - Import your own model from your app */
-interface User {
-    // ...
+export interface USER_ROLES extends POST<APIs.USER> {
+    endpoint: 'roles';
+    data: {
+        id: number;
+    };
+    response: ApiResponse<UserRoles>;
 }
 
-export interface LOGIN extends POST<APIs.AUTH> {
+export interface USER_NOTIFICATIONS extends GET<APIs.USER> {
+    endpoint: 'notifications';
+    response: ApiResponse<string[]>
+}
+```
+```ts
+// auth.ts
+import { ApiResponse, APIs, GET, POST } from '../models/_api';
+import { User } from '../models/user';
+
+export interface login extends POST<APIs.AUTH> {
     endpoint: 'login';
     data: {
         username: string;
@@ -55,20 +86,17 @@ export interface LOGIN extends POST<APIs.AUTH> {
     response: ApiResponse<User>;
 }
 
-export interface LOGIN extends POST<APIs.AUTH> {
-    endpoint: 'login';
-    data: {
-        username: string;
-        password: string;
-    };
-    response: ApiResponse<User>;
-}
-
-export interface LOGOUT extends GET<APIs.AUTH> {
+export interface logout extends GET<APIs.AUTH> {
     endpoint: 'logout';
+    // no params
+    // response is ApiResponse<any> by default
 }
 ```
 
 ### 3) Run the tool
+Run the `generateApi()` function to generate your api services.
 
-the tool will generate the request calls for you where you can import and use them in you app.
+### Result
+```ts
+
+```

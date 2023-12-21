@@ -7,7 +7,7 @@ export interface USER_ROLES extends POST<APIs.USER> {
     data: {
         id: number;
     };
-    response: ApiResponse<UserRoles>;
+    response: ApiResponse<UserRoles<string>>;
 }
 
 export interface USER_NOTIFICATIONS extends GET<APIs.USER> {

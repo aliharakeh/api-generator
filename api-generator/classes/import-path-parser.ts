@@ -1,8 +1,7 @@
 // import\(["'](.*?)["']\) ==> matches import("/path/to/file")
 // \. ==> matches exact `.` char
-// (\w+(?:<\w+>)?) ==> matches any the imported item without its generic inner type
-// TODO: we need the generic part too if it's a primitive type
-const MODELS_REGEX = /import\(["'](.*?)["']\)\.(\w+(?:<\w+>)?)/g;
+// (\w+(?:<[\w\[\]]+>)?) ==> matches any the imported item
+const MODELS_REGEX = /import\(["'](.*?)["']\)\.(\w+(?:<[\w\[\]]+>)?)/g;
 
 export class ImportPathParser {
     importMap = new Map<string, Set<string>>;
@@ -35,7 +34,7 @@ export class ImportPathParser {
 
     // clean path from any local parts
     cleanLocalPath(importPath: string) {
-        return importPath.split(`/${this.rootPath}/`)[1]; // TODO: needs adjustment to path
+        return importPath.split(`/${this.rootPath}/`)[1];
     }
 
     // join all models to construct the full model

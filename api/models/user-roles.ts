@@ -1,3 +1,4 @@
-export interface UserRoles {
-    // ...
+export interface UserRoles<T> {
+    roleId: number;
+    roles: T[];
 }
