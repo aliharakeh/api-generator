@@ -100,7 +100,7 @@ export interface logout extends GET<APIs.AUTH> {
 ### 3) Run the tool
 Run the `generateApi()` function to generate your api services.
 
-## Result
+# Result
 ```ts
 import { Injectable } from '@angular/core';
 import { HttpParams, HttpClient } from '@angular/common/http';
