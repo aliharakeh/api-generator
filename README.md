@@ -32,8 +32,10 @@ export enum APIs {
     APP_V2 = '/app/v2',
 }
 ```
+
 ### 2) Add you API Models
 add your api models in the `models` folder in the formal of `<model>.ts`
+
 ```ts
 // user.ts
 export interface User {
@@ -43,6 +45,7 @@ export interface User {
   password: string;
 }
 ```
+
 ```ts
 // user-roles.ts
 export interface UserRoles {
@@ -72,6 +75,7 @@ export interface USER_NOTIFICATIONS extends GET<APIs.USER> {
     response: ApiResponse<string[]>
 }
 ```
+
 ```ts
 // auth.ts
 import { ApiResponse, APIs, GET, POST } from '../models/_api';
@@ -96,7 +100,7 @@ export interface logout extends GET<APIs.AUTH> {
 ### 3) Run the tool
 Run the `generateApi()` function to generate your api services.
 
-### Result
+## Result
 ```ts
 import { Injectable } from '@angular/core';
 import { HttpParams, HttpClient } from '@angular/common/http';
