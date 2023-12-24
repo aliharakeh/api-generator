@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs';
 import { writeFile } from 'fs/promises';
-import Handlebars from 'handlebars';
+import { compile } from 'handlebars';
 import { join } from 'node:path';
 import { Project } from 'ts-morph';
 import { InterfaceParser } from './classes/interface-parser';
@@ -11,7 +11,7 @@ const ENDPOINTS_PATH = 'endpoints';
 const MODELS_PATH = 'models';
 const OUTPUT_PATH = 'services';
 
-const serviceTemplate = Handlebars.compile(
+const serviceTemplate = compile(
     readFileSync(join('api-generator', 'templates', 'angular-service.handlebars'), { encoding: 'utf-8' })
 );
 
