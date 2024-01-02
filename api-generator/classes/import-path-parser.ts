@@ -40,7 +40,7 @@ export class ImportPathParser {
     // join all models to construct the full model
     updateModel(models: string[]) {
         this.model = models.reverse().reduce((acc, model, i) => {
-            return i == 0 ? model : `${model}<${acc}>`;
+            return i === 0 ? model : `${model}<${acc}>`;
         }, '');
     }
 }
